@@ -1,5 +1,5 @@
 
-import CategoryGrid from './components/categoriesgrid';
+import CategoryGrid from "./components/categoriesgrid";
 
 
 // 2. يجب أن يكون هناك export default للدالة الأساسية
