@@ -5,7 +5,6 @@ import { useAdminAuthStore } from "./store/useAdminAuthStore";
 import { usePathname, useRouter } from "next/navigation";
 import AdminSidebar from "./components/sidebar";
 import AdminTopbar from "./components/navbar";
-import AdminLogin from "./login/page";
 
 export default function AdminLayout({ children }) {
   const { admin, loading, verifyAdmin } = useAdminAuthStore();
@@ -31,42 +30,43 @@ export default function AdminLayout({ children }) {
     </div>
   );
 
-  // لو الصفحة الحالية هي صفحة اللوجن، نعرضها بدون Layout
   if (pathname === "/admin/login") {
     return <Providers>{children}</Providers>;
   }
 
   return (
     <Providers>
-      <div className="flex min-h-screen bg-gray-100 rtl dark:bg-gray-900">
+      <div className="flex min-h-screen bg-gray-100 rtl dark:bg-gray-900 overflow-hidden">
+        {/* القائمة الجانبية */}
         <AdminSidebar disabled={!admin} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+
+        {/* الطبقة المعتمة عند فتح المنيو في الموبايل لإغلاقه عند الضغط في الخارج */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/20 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
         <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out ltr:ml-0 rtl:mr-0 md:ltr:ml-64 md:rtl:mr-64">
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="md:hidden fixed top-4 ltr:left-4 rtl:right-4 z-50 p-2 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          {/* زر الهمبرجر: يظهر فقط إذا كانت القائمة مغلقة */}
+          {!isSidebarOpen && (
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden fixed top-4 ltr:left-4 rtl:right-4 z-50 p-2 bg-transparent text-gray-800 dark:text-gray-200 border-none outline-none"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              ></path>
-            </svg>
-          </button>
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          )}
+
           <AdminTopbar />
           <section className="p-4 md:p-8">
             {admin ? children : null}
           </section>
         </main>
       </div>
-
     </Providers>
   );
 }
