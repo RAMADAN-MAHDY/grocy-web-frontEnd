@@ -36,7 +36,7 @@ api.interceptors.response.use(
         const isAdminPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
         
         // مسارات التجديد: نستخدم /auth/adminrefresh للأدمن و /auth/refresh-token للمتجر
-        const refreshPath = isAdminPath ? '/auth/adminrefresh' : '/auth/refresh-token';
+        const refreshPath = isAdminPath ? '/auth/adminrefresh' : '/auth/refresh';
 
         // محاولة تجديد التوكن
         const res = await axios.post(`${API_BASE_URL}${refreshPath}`, 
