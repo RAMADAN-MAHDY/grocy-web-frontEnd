@@ -1,7 +1,31 @@
-import React from 'react';
-import { Facebook, MessageCircle, Instagram, Video } from 'lucide-react'; // استيراد الأيقونات المطلوبة
+ "use client";
+import React, { useEffect, useState } from 'react';
+import { Facebook, MessageCircle, Instagram, Video, Phone, Mail } from 'lucide-react';
+import api from "@/app/api";
 
 const Footer = () => {
+  const [settings, setSettings] = useState({
+    footerText: "",
+    contactEmail: "",
+    phone: "",
+    facebookLink: "",
+    instagramLink: "",
+    whatsappLink: "",
+    tiktokLink: "",
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await api.get("/settings");
+        setSettings(res.data || {});
+      } catch (e) {
+        // تجاهل الخطأ وإظهار قيم افتراضية
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <footer className="bg-[#f2f2f2] border-t border-gray-200 pt-10 pb-6 mt-10" dir="rtl">
       <div className="max-w-7xl mx-auto px-6">
@@ -13,14 +37,18 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold text-[#8a8a8a] mb-4">تواصل معنا</h3>
             <div className="flex flex-col gap-3 items-center md:items-start">
-              <a href="tel:+20123456789" className="flex items-center gap-2 text-[#8a8a8a] hover:text-red-600 transition">
+              {settings.phone && (
+              <a href={`tel:${settings.phone}`} className="flex items-center gap-2 text-[#8a8a8a] hover:text-red-600 transition" dir="ltr">
                 <Phone size={18} />
-                <span dir="ltr">+20 123 456 789</span>
+                <span>{settings.phone}</span>
               </a>
-              <a href="mailto:info@store.com" className="flex items-center gap-2 text-[#8a8a8a] hover:text-red-600 transition">
+              )}
+              {settings.contactEmail && (
+              <a href={`mailto:${settings.contactEmail}`} className="flex items-center gap-2 text-[#8a8a8a] hover:text-red-600 transition">
                 <Mail size={18} />
-                <span>info@store.com</span>
+                <span>{settings.contactEmail}</span>
               </a>
+              )}
             </div>
           </div>
 
@@ -29,21 +57,29 @@ const Footer = () => {
             <h3 className="text-lg font-bold text-[#8a8a8a] mb-4">تابعنا على</h3>
             <div className="flex justify-center md:justify-start gap-5">
               {/* فيسبوك */}
-              <a href="#" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-[#1877F2] transition">
-                <Facebook size={22} />
-              </a>
+              {settings.facebookLink && (
+                <a href={settings.facebookLink} target="_blank" rel="noopener noreferrer" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-[#1877F2] transition">
+                  <Facebook size={22} />
+                </a>
+              )}
               {/* واتساب */}
-              <a href="#" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-[#25D366] transition">
-                <MessageCircle size={22} />
-              </a>
+              {settings.whatsappLink && (
+                <a href={settings.whatsappLink} target="_blank" rel="noopener noreferrer" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-[#25D366] transition">
+                  <MessageCircle size={22} />
+                </a>
+              )}
               {/* تيك توك */}
-              <a href="#" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-black transition">
-                <Video size={22} /> 
-              </a>
+              {settings.tiktokLink && (
+                <a href={settings.tiktokLink} target="_blank" rel="noopener noreferrer" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-black transition">
+                  <Video size={22} /> 
+                </a>
+              )}
               {/* انستجرام */}
-              <a href="#" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-[#E4405F] transition">
-                <Instagram size={22} />
-              </a>
+              {settings.instagramLink && (
+                <a href={settings.instagramLink} target="_blank" rel="noopener noreferrer" className="bg-white p-2 rounded-full shadow-sm text-[#8a8a8a] hover:text-[#E4405F] transition">
+                  <Instagram size={22} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -61,15 +97,12 @@ const Footer = () => {
 
         {/* الجزء السفلي: حقوق النشر */}
         <div className="text-center text-[#8a8a8a] text-sm font-medium">
-          <p>© {new Date().getFullYear()} جميع الحقوق محفوظة لمتجرنا</p>
+          <p>{settings.footerText || `© ${new Date().getFullYear()} جميع الحقوق محفوظة لمتجرنا`}</p>
         </div>
         
       </div>
     </footer>
   );
 };
-
-// ملاحظة: تأكدي من استيراد الأيقونات المتبقية في الأعلى إذا لم تكن موجودة
-import { Phone, Mail } from 'lucide-react';
 
 export default Footer;
