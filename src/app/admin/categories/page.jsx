@@ -9,9 +9,13 @@ import Activity from "@/app/loading";
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [newName, setNewName] = useState("");
+  const [newImageFile, setNewImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [editPreviewUrl, setEditPreviewUrl] = useState("");
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -33,12 +37,16 @@ export default function CategoriesPage() {
     if (!newName.trim()) return toast.warn("أدخل اسم القسم أولاً");
 
     try {
-      await axios.post(
-        "https://iraqi-e-store-api.vercel.app/api/categories",
-        { name: newName },
-        { withCredentials: true }
-      );
+      const formData = new FormData();
+      formData.append("name", newName);
+      if (newImageFile) formData.append("image", newImageFile);
+
+      await axios.post("https://iraqi-e-store-api.vercel.app/api/categories", formData, {
+        withCredentials: true,
+      });
       setNewName("");
+      setNewImageFile(null);
+      setPreviewUrl("");
       fetchCategories();
       toast.success("تمت إضافة القسم بنجاح 🚀");
     } catch (err) {
@@ -71,36 +79,33 @@ export default function CategoriesPage() {
   const cancelEdit = () => {
     setEditingId(null);
     setEditName("");
+    setEditImageFile(null);
+    setEditPreviewUrl("");
   };
 
   // Update category
   const handleUpdate = async (id) => {
     if (!editName.trim()) return toast.warn("أدخل الاسم الجديد");
-
-    // حفظ الاسم القديم
-    const original = categories.find(cat => cat._id === id)?.name;
-
     try {
+      const formData = new FormData();
+      formData.append("name", editName);
+      if (editImageFile) formData.append("image", editImageFile);
+
       await axios.put(
         `https://iraqi-e-store-api.vercel.app/api/categories/${id}`,
-        { name: editName },
+        formData,
         { withCredentials: true }
       );
 
-      // تحديث الاسم مباشرة في الواجهة
-      setCategories(prev =>
-        prev.map(cat => (cat._id === id ? { ...cat, name: editName } : cat))
-      );
-
+      await fetchCategories();
       setEditingId(null);
       setEditName("");
+      setEditImageFile(null);
+      setEditPreviewUrl("");
       toast.success("تم تعديل القسم بنجاح");
     } catch (err) {
       console.error(err);
       toast.error("فشل تعديل القسم");
-      // إعادة الاسم القديم وإلغاء التحرير
-      setEditName(original);
-      setEditingId(null);
     }
   };
 
@@ -133,6 +138,22 @@ export default function CategoriesPage() {
           placeholder="اسم القسم الجديد..."
           className="w-full flex-1 p-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-green-500 dark:text-white outline-none shadow-sm hover:shadow-md transition-all"
         />
+        <div className="w-full md:w-auto flex items-center gap-3">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setNewImageFile(file);
+              if (file) setPreviewUrl(URL.createObjectURL(file));
+              else setPreviewUrl("");
+            }}
+            className="block w-full md:w-48 text-sm text-gray-600 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+          />
+          {previewUrl && (
+            <img src={previewUrl} alt="معاينة" className="w-12 h-12 rounded-xl object-cover border" />
+          )}
+        </div>
         <button
           onClick={handleAdd}
           className="w-full md:w-auto px-8 py-4 md:px-5 md:py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl transition-transform transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm md:text-base shadow-md"
@@ -163,6 +184,29 @@ export default function CategoriesPage() {
                 <span className="text-lg font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
                   {cat.name}
                 </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {editingId === cat._id ? (
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setEditImageFile(file);
+                      if (file) setEditPreviewUrl(URL.createObjectURL(file));
+                      else setEditPreviewUrl("");
+                    }}
+                    className="block w-40 text-sm text-gray-600 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  {editPreviewUrl && (
+                    <img src={editPreviewUrl} alt="معاينة" className="w-12 h-12 rounded-xl object-cover border" />
+                  )}
+                </div>
+              ) : (
+                <img src={cat.image || "/placeholder.jpg"} alt={cat.name} className="w-12 h-12 rounded-xl object-cover border" />
               )}
             </div>
 

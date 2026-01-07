@@ -7,22 +7,11 @@ const CategoryGrid = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const localImages = {
-    "سكر": "/sokar.jpg",
-    "رز": "/orz.jpeg",
-    "شاي": "/shay.jpg",
-    "حليب": "/haleb.jpg",
-    "بقوليات": "/bekoleat.png", 
-    "باستا": "/pasta.jpg",
-    "دهن": "/dehn.jpg",         
-    "مشكل": "/meshakel.jpg", 
-  };
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get('https://iraqi-e-store-api.vercel.app/api/categories');
-        setCategories(response.data);
+        setCategories(response.data.categories || response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching categories:', err);
@@ -45,8 +34,8 @@ const CategoryGrid = () => {
           >
           
             <img 
-              src={localImages[category.name] || "/placeholder.jpg"} 
-              alt={category.name}
+              src={category.image || "/placeholder.jpg"} 
+              alt={category.name || "تصنيف"}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
 
