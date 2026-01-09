@@ -146,7 +146,7 @@ useEffect(() => {
               className="bg-white rounded-3xl p-3 shadow-sm flex flex-col items-center relative border border-gray-100 w-[calc(50%-8px)] md:w-[220px]"
             >
               <div className="absolute top-3 left-3 bg-gray-100 text-[10px] px-2 py-0.5 rounded-full">
-                {product.weight || "N/A"}
+                {product. discountPercent|| ""} %
               </div>
 
               <div 
