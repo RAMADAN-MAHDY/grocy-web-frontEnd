@@ -1,36 +1,28 @@
 "use client";
 import { useState } from "react";
-import api from "@/app/api"; // نستخدم الـ api بتاعنا اللي فيه الانترسيبتور
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/app/(shop)/store/useAuthStore"; // الستور اللي عملناه عشان نحفظ اليوزر
 import Link from "next/link";
 import { toast } from "react-toastify";
 import GoogleSignInButton from "../components/GoogleSignInButton";
+import { useLogin } from "../store/useAuth";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const { mutate: login, isLoading } = useLogin();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      // إرسال طلب تسجيل الدخول
-      await api.post("/auth/login", { ...form, client: "web" });
-      
-      // تحديث بيانات المستخدم في الستور العالمي (Zustand)
-      await checkAuth();
-      
-      toast.success("تم تسجيل الدخول بنجاح");
-      router.push("/"); // التوجه للرئيسية
-    } catch (error) {
-      const msg = error.response?.data?.message || "البريد أو كلمة المرور غير صحيحة";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
+    login(form, {
+      onSuccess: () => {
+        toast.success("تم تسجيل الدخول بنجاح");
+        router.push("/");
+      },
+      onError: (error) => {
+        const msg = error.response?.data?.message || "البريد أو كلمة المرور غير صحيحة";
+        toast.error(msg);
+      },
+    });
   };
 
   return (
@@ -54,10 +46,10 @@ export default function LoginPage() {
             required
           />
           <button 
-            disabled={loading}
-            className={`w-full mt-6 text-white font-bold py-4 rounded-2xl shadow-lg transition-all ${loading ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 active:scale-95'}`}
+            disabled={isLoading}
+            className={`w-full mt-6 text-white font-bold py-4 rounded-2xl shadow-lg transition-all ${isLoading ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 active:scale-95'}`}
           >
-            {loading ? "جاري الدخول..." : "دخول"}
+            {isLoading ? "جاري الدخول..." : "دخول"}
           </button>
         </form>
 
